@@ -1,4 +1,5 @@
 import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
+import { shadcn } from "@clerk/ui/themes";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
@@ -19,7 +20,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <ClerkProvider afterSignOutUrl="/">
+        <ClerkProvider
+          afterSignOutUrl="/"
+          appearance={{
+            theme: shadcn,
+            variables: {
+              colorPrimary: "#1570EF",
+              colorBackground: "#FFFFFF",
+              colorForeground: "#101828",
+            },
+          }}
+        >
           <Suspense fallback={<div className="h-[57px] border-b border-border bg-surface" aria-hidden="true" />}>
             <header className="border-b border-border px-4 py-3 flex items-center justify-between bg-surface">
               <Show when="signed-out">

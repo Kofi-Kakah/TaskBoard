@@ -1,8 +1,10 @@
 @import "tailwindcss";
+@import "@clerk/ui/themes/shadcn.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
 :root {
+  color-scheme: light;
   --canvas: #f4f5f7;
   --surface: #ffffff;
   --column-bg: #f6f7f9;
@@ -196,6 +198,14 @@ button { cursor: pointer; }
 .ui-calendar button { min-width: 32px; min-height: 32px; border-radius: 8px; background: transparent; color: inherit; }
 .ui-calendar button:hover { background: #f2f4f7; }
 .ui-calendar [aria-selected="true"] { background: var(--primary); color: #fff; }
+.auth-page { display: grid; min-height: calc(100vh - 57px); place-items: center; padding: 32px 16px; }
+.auth-frame { display: flex; width: min(100%, 440px); flex-direction: column; align-items: center; padding: 28px 24px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-card); }
+.auth-brand-tile { display: grid; width: 40px; height: 40px; place-items: center; margin-bottom: 14px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); font-size: 20px; font-weight: 600; }
+.auth-frame h1 { margin: 0; color: var(--text); font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.auth-caption { margin: 7px 0 22px; color: var(--text-muted); font-size: 13px; }
+.protected-placeholder { display: grid; min-height: calc(100vh - 57px); align-content: center; justify-items: center; padding: 24px; text-align: center; }
+.protected-placeholder h1 { margin: 0; font-size: 20px; font-weight: 600; }
+.protected-placeholder p { color: var(--text-muted); font-size: 13px; }
 @media (max-width: 720px) { .preview-shell { padding: 20px 14px; } .preview-layout { grid-template-columns: 1fr; } }
 
 @layer base {
