@@ -12,7 +12,7 @@ function PriorityTile({ priority }: { priority: TaskWithLabels["priority"] }) {
   return <span className={`priority-tile priority-${priority}`} aria-label={labels[priority]} title={labels[priority]}><span className="priority-bars" aria-hidden="true"><i /><i /><i /></span></span>;
 }
 
-export function TaskCard({ task, onEdit, onDelete, dragAttributes, dragListeners, dragActivatorRef }: { task: TaskWithLabels; onEdit: (task: TaskWithLabels) => void; onDelete: (task: TaskWithLabels) => void; dragAttributes?: DraggableAttributes; dragListeners?: DraggableSyntheticListeners; dragActivatorRef?: (element: HTMLElement | null) => void }) {
+export function TaskCard({ task, onEdit, onDelete, dragAttributes, dragListeners, dragActivatorRef, readOnly = false }: { task: TaskWithLabels; onEdit: (task: TaskWithLabels) => void; onDelete: (task: TaskWithLabels) => void; dragAttributes?: DraggableAttributes; dragListeners?: DraggableSyntheticListeners; dragActivatorRef?: (element: HTMLElement | null) => void; readOnly?: boolean }) {
   const dueStatus = task.due_date ? getDueDateStatus(task.due_date) : null;
   function handleOpenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "Enter") {
@@ -22,7 +22,7 @@ export function TaskCard({ task, onEdit, onDelete, dragAttributes, dragListeners
   }
   return (
     <article className="kanban-task-card">
-      <div ref={dragActivatorRef} className="task-card-open task-card-content" role="button" tabIndex={0} onClick={() => onEdit(task)} onKeyDown={handleOpenKeyDown} aria-label={`Edit task: ${task.title}`} {...dragAttributes} {...dragListeners}>
+      <div ref={dragActivatorRef} className={`task-card-content${readOnly ? "" : " task-card-open"}`} role={readOnly ? undefined : "button"} tabIndex={readOnly ? undefined : 0} onClick={readOnly ? undefined : () => onEdit(task)} onKeyDown={readOnly ? undefined : handleOpenKeyDown} aria-label={readOnly ? undefined : `Edit task: ${task.title}`} {...(!readOnly ? dragAttributes : undefined)} {...(!readOnly ? dragListeners : undefined)}>
         <div className="task-card-heading">
           <span className="task-label-marker" style={{ backgroundColor: task.labels[0]?.color ?? "#EAECF0", color: task.labels[0]?.color ?? "#667085" }} aria-hidden="true"><Circle size={11} /></span>
           <span className="task-card-title" title={task.title}>{task.title}</span>
@@ -42,13 +42,13 @@ export function TaskCard({ task, onEdit, onDelete, dragAttributes, dragListeners
           </div>}
         </div>
       </div>
-      <DropdownMenu>
+      {!readOnly && <DropdownMenu>
         <DropdownMenuTrigger asChild><button className="icon-button task-menu-button" type="button" aria-label={`More options for ${task.title}`}><MoreHorizontal size={17} /></button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => onEdit(task)}>Edit</DropdownMenuItem>
           <DropdownMenuItem className="menu-item-danger" onSelect={() => onDelete(task)}>Delete</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu>}
     </article>
   );
 }

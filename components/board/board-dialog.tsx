@@ -12,7 +12,9 @@ import { boardColors, resolveBoardColor } from "@/lib/validation/boards";
 import type { BoardRow } from "@/types/database";
 import type { LabelRow } from "@/types/database";
 
-export function BoardDialog({ board, trigger, labels = [], onLabelsChange }: { board?: BoardRow; trigger: ReactNode; labels?: LabelRow[]; onLabelsChange?: (labels: LabelRow[]) => void }) {
+type EditableBoard = Pick<BoardRow, "id" | "title" | "description" | "color" | "visibility">;
+
+export function BoardDialog({ board, trigger, labels = [], onLabelsChange }: { board?: EditableBoard; trigger: ReactNode; labels?: LabelRow[]; onLabelsChange?: (labels: LabelRow[]) => void }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();

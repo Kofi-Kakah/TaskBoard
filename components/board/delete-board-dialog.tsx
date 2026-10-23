@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { BoardSummary } from "@/lib/boards";
 
+type DeletableBoard = Pick<BoardSummary, "id" | "title" | "columnCount" | "taskCount">;
+
 export function DeleteBoardDialog({
   board,
   trigger,
   redirectAfterDelete = false,
 }: {
-  board: BoardSummary;
+  board: DeletableBoard;
   trigger: ReactNode;
   redirectAfterDelete?: boolean;
 }) {

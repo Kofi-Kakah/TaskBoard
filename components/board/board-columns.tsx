@@ -18,16 +18,16 @@ type Snapshot = ColumnSummary[];
 type TaskMove = (taskId: string, columnId: string, previousId: string | null, nextId: string | null, snapshot: Snapshot) => Promise<void>;
 type ColumnMove = (columnId: string, previousId: string | null, nextId: string | null, snapshot: Snapshot) => Promise<void>;
 
-function TaskItem({ task, disabled, onEdit, onDelete }: { task: TaskWithLabels; disabled: boolean; onEdit: (task: TaskWithLabels) => void; onDelete: (task: TaskWithLabels) => void }) {
+function TaskItem({ task, disabled, readOnly, onEdit, onDelete }: { task: TaskWithLabels; disabled: boolean; readOnly: boolean; onEdit: (task: TaskWithLabels) => void; onDelete: (task: TaskWithLabels) => void }) {
   const sortable = useSortable({ id: task.id, disabled, data: { type: "task", columnId: task.column_id, title: task.title } });
   const style: CSSProperties = { transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition, opacity: sortable.isDragging ? 0.35 : undefined };
   return <div ref={sortable.setNodeRef} style={style} className={sortable.isDragging ? "kanban-task-sortable is-dragging" : "kanban-task-sortable"}>
-    <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} dragAttributes={sortable.attributes} dragListeners={sortable.listeners} dragActivatorRef={sortable.setActivatorNodeRef} />
+    <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} dragAttributes={sortable.attributes} dragListeners={sortable.listeners} dragActivatorRef={sortable.setActivatorNodeRef} readOnly={readOnly} />
   </div>;
 }
 
-function ColumnCard({ boardId, column, disabled, onQuickAdd, onEditTask, onDeleteTask }: {
-  boardId: string; column: ColumnSummary; disabled: boolean;
+function ColumnCard({ boardId, column, disabled, readOnly, onQuickAdd, onEditTask, onDeleteTask }: {
+  boardId: string; column: ColumnSummary; disabled: boolean; readOnly: boolean;
   onQuickAdd: (columnId: string, title: string) => Promise<boolean>; onEditTask: (task: TaskWithLabels) => void; onDeleteTask: (task: TaskWithLabels) => void;
 }) {
   const sortable = useSortable({ id: column.id, disabled, data: { type: "column", title: column.title } });
@@ -47,24 +47,24 @@ function ColumnCard({ boardId, column, disabled, onQuickAdd, onEditTask, onDelet
   }
   return <section ref={sortable.setNodeRef} style={style} className={`kanban-column${drop.isOver ? " is-drop-target" : ""}`} aria-label={`${column.title}, ${column.taskCount} tasks`}>
     <header className="kanban-column-header">
-      <button ref={sortable.setActivatorNodeRef} className="column-grip" type="button" aria-label={`Reorder ${column.title}`} {...sortable.attributes} {...sortable.listeners}><Grip size={16} /></button>
+      {!readOnly && <button ref={sortable.setActivatorNodeRef} className="column-grip" type="button" aria-label={`Reorder ${column.title}`} {...sortable.attributes} {...sortable.listeners}><Grip size={16} /></button>}
       <span className="column-name-pill" style={{ backgroundColor: column.color }}>{column.title}</span>
       <span className="kanban-task-count">{column.taskCount}</span><span className="column-header-spacer" />
-      <DropdownMenu><DropdownMenuTrigger asChild><button className="icon-button column-menu-button" type="button" aria-label={`More options for ${column.title}`}><MoreHorizontal size={17} /></button></DropdownMenuTrigger><DropdownMenuContent align="end">
+      {!readOnly && <DropdownMenu><DropdownMenuTrigger asChild><button className="icon-button column-menu-button" type="button" aria-label={`More options for ${column.title}`}><MoreHorizontal size={17} /></button></DropdownMenuTrigger><DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={() => setDialogMode("rename")}>Rename</DropdownMenuItem><DropdownMenuItem onSelect={() => setDialogMode("color")}>Change color</DropdownMenuItem><DropdownMenuItem className="menu-item-danger" onSelect={() => setDeleteOpen(true)}>Delete column</DropdownMenuItem>
-      </DropdownMenuContent></DropdownMenu>
-      <button className="icon-button column-add-button" type="button" aria-label={`Add task to ${column.title}`} onClick={openComposer}><Plus size={16} /></button>
+      </DropdownMenuContent></DropdownMenu>}
+      {!readOnly && <button className="icon-button column-add-button" type="button" aria-label={`Add task to ${column.title}`} onClick={openComposer}><Plus size={16} /></button>}
     </header>
     <SortableContext items={column.tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
       <div ref={drop.setNodeRef} className={`kanban-column-cards${drop.isOver ? " is-drop-target" : ""}`}>
         {composerOpen && <form className="quick-task-composer" onSubmit={(event) => { event.preventDefault(); void submitQuickAdd(); }}><input ref={inputRef} value={title} maxLength={120} placeholder="Task title" aria-label={`New task in ${column.title}`} onChange={(event) => setTitle(event.target.value)} onKeyDown={handleComposerKeyDown} /><div><span>Enter to add · Esc to close</span><button type="submit" disabled={!title.trim() || pending}>{pending ? "Adding…" : "Add task"}</button></div></form>}
-        {column.tasks.map((task) => <TaskItem key={task.id} task={task} disabled={disabled} onEdit={onEditTask} onDelete={onDeleteTask} />)}
+        {column.tasks.map((task) => <TaskItem key={task.id} task={task} disabled={disabled} readOnly={readOnly} onEdit={onEditTask} onDelete={onDeleteTask} />)}
         {column.taskCount === 0 && !composerOpen && <p className="kanban-column-empty">No tasks yet</p>}
       </div>
     </SortableContext>
-    <ColumnDialog boardId={boardId} column={column} mode="rename" open={dialogMode === "rename"} onOpenChange={(open) => setDialogMode(open ? "rename" : null)} />
+    {!readOnly && <><ColumnDialog boardId={boardId} column={column} mode="rename" open={dialogMode === "rename"} onOpenChange={(open) => setDialogMode(open ? "rename" : null)} />
     <ColumnDialog boardId={boardId} column={column} mode="color" open={dialogMode === "color"} onOpenChange={(open) => setDialogMode(open ? "color" : null)} />
-    <DeleteColumnDialog boardId={boardId} column={column} open={deleteOpen} onOpenChange={setDeleteOpen} />
+    <DeleteColumnDialog boardId={boardId} column={column} open={deleteOpen} onOpenChange={setDeleteOpen} /></>}
   </section>;
 }
 
@@ -86,10 +86,10 @@ function insertTask(columns: Snapshot, taskId: string, targetColumnId: string, o
   return stripped.map((column) => column.id === targetColumnId ? { ...column, tasks, taskCount: tasks.length } : column);
 }
 
-export function BoardColumns({ boardId, columns, onColumnsChange, onQuickAdd, onEditTask, onDeleteTask, onMoveTask, onMoveColumn, dragDisabled = false, dragDisabledReason }: {
+export function BoardColumns({ boardId, columns, onColumnsChange, onQuickAdd, onEditTask, onDeleteTask, onMoveTask, onMoveColumn, dragDisabled = false, dragDisabledReason, readOnly = false }: {
   boardId: string; columns: ColumnSummary[]; onColumnsChange: (columns: ColumnSummary[]) => void;
   onQuickAdd: (columnId: string, title: string) => Promise<boolean>; onEditTask: (task: TaskWithLabels) => void; onDeleteTask: (task: TaskWithLabels) => void;
-  onMoveTask: TaskMove; onMoveColumn: ColumnMove; dragDisabled?: boolean; dragDisabledReason?: string;
+  onMoveTask: TaskMove; onMoveColumn: ColumnMove; dragDisabled?: boolean; dragDisabledReason?: string; readOnly?: boolean;
 }) {
   const snapshot = useRef<Snapshot>(columns);
   const active = useRef<{ type: string; id: string; title: string } | null>(null);
@@ -146,11 +146,12 @@ export function BoardColumns({ boardId, columns, onColumnsChange, onQuickAdd, on
   return <DndContext id={`taskboard-dnd-${boardId}`} sensors={sensors} collisionDetection={closestCorners} accessibility={{ announcements, screenReaderInstructions: { draggable: "Press Space to pick up, arrow keys to move, and Space to drop." } }} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={(event) => void handleDragEnd(event)} onDragCancel={handleDragCancel}>
     <SortableContext items={columns.map((column) => column.id)} strategy={horizontalListSortingStrategy}>
       <section className="kanban-board" aria-label="Board columns">
-        {columns.map((column) => <ColumnCard key={column.id} boardId={boardId} column={column} disabled={dragDisabled} onQuickAdd={onQuickAdd} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />)}
-        <ColumnDialog boardId={boardId} mode="create" trigger={<Button type="button" variant="outline" className="add-column-ghost"><Plus size={17} /> Add column</Button>} />
+        {columns.map((column) => <ColumnCard key={column.id} boardId={boardId} column={column} disabled={dragDisabled || readOnly} readOnly={readOnly} onQuickAdd={onQuickAdd} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />)}
+        {!readOnly && <ColumnDialog boardId={boardId} mode="create" trigger={<Button type="button" variant="outline" className="add-column-ghost"><Plus size={17} /> Add column</Button>} />}
       </section>
     </SortableContext>
     <DragOverlay>{overlay ? <div className="drag-overlay-card" aria-hidden="true">{overlay.type === "column" ? <span className="column-name-pill">{overlay.title}</span> : overlay.title}</div> : null}</DragOverlay>
-    {dragDisabled && dragDisabledReason && <p className="drag-disabled-hint">{dragDisabledReason}</p>}
+    {readOnly && <p className="drag-disabled-hint">View only. Only the board owner can make changes.</p>}
+    {!readOnly && dragDisabled && dragDisabledReason && <p className="drag-disabled-hint">{dragDisabledReason}</p>}
   </DndContext>;
 }

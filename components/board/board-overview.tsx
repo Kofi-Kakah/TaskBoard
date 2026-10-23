@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { endOfWeek, isToday, isWithinInterval, startOfWeek } from "date-fns";
 import { toast } from "sonner";
 import { Filter, Plus, Search, SquareKanban, X } from "lucide-react";
@@ -17,12 +18,12 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getDueDateStatus, parseDateOnly } from "@/lib/dates";
-import type { BoardSummary } from "@/lib/boards";
+import type { BoardDisplaySummary } from "@/lib/boards";
 import type { ColumnSummary } from "@/lib/columns";
 import type { TaskFormValues } from "@/lib/validation/tasks";
 import type { LabelRow, TaskWithLabels } from "@/types/database";
 
-export function BoardOverview({ board, columns: initialColumns, labels: initialLabels }: { board: BoardSummary; columns: ColumnSummary[]; labels: LabelRow[] }) {
+export function BoardOverview({ board, columns: initialColumns, labels: initialLabels, canEdit = true, signedIn = true }: { board: BoardDisplaySummary; columns: ColumnSummary[]; labels: LabelRow[]; canEdit?: boolean; signedIn?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -190,6 +191,8 @@ export function BoardOverview({ board, columns: initialColumns, labels: initialL
         <kbd>⌘ K</kbd>
       </label>
       <div className="board-toolbar-actions">
+        {!canEdit && <span className="view-only-badge">View only</span>}
+        {canEdit && <>
         <div className="add-new-split">
           <Button type="button" variant="default" className="add-new-main" disabled={!columns.length} onClick={() => { setEditingTask(undefined); setTaskOpen(true); }}><Plus size={15} /> New task</Button>
           <DropdownMenu>
@@ -207,8 +210,10 @@ export function BoardOverview({ board, columns: initialColumns, labels: initialL
           setColumns((current) => current.map((column) => ({ ...column, tasks: column.tasks.map((task) => ({ ...task, labels: task.labels.flatMap((label) => labelsById.has(label.id) ? [labelsById.get(label.id)!] : []) })) })));
         }} trigger={<Button type="button" variant="outline">Board settings</Button>} />
         <DeleteBoardDialog board={board} redirectAfterDelete trigger={<Button type="button" variant="outline" className="danger-outline">Delete board</Button>} />
+        </>}
       </div>
     </section>
+    {!signedIn && <div className="view-only-signin-prompt">Sign in to create your own board. <Link href="/sign-in">Sign in</Link></div>}
     <section className="board-subtoolbar" aria-label="Task filters">
       <div className="active-filter-list">
         {priorities.map((priority) => <span className="active-filter-chip" key={`priority-${priority}`}>Priority: {priority}<button type="button" aria-label={`Remove ${priority} priority filter`} onClick={() => setPriority(priority, false)}><X size={12} /></button></span>)}
@@ -229,7 +234,7 @@ export function BoardOverview({ board, columns: initialColumns, labels: initialL
       </Popover>
     </section>
     {noMatches && <div className="board-no-matches" role="status">{query ? "No tasks match your search." : "No tasks match these filters."}</div>}
-    {columns.length ? <BoardColumns boardId={board.id} columns={visibleColumns} dragDisabled={dragDisabled} dragDisabledReason={dragDisabledReason} onColumnsChange={setColumns} onQuickAdd={quickAdd} onEditTask={(task) => { setEditingTask(task); setTaskOpen(true); }} onDeleteTask={setDeletingTask}
+    {columns.length ? <BoardColumns boardId={board.id} columns={visibleColumns} readOnly={!canEdit} dragDisabled={dragDisabled || !canEdit} dragDisabledReason={dragDisabledReason} onColumnsChange={setColumns} onQuickAdd={quickAdd} onEditTask={(task) => { setEditingTask(task); setTaskOpen(true); }} onDeleteTask={setDeletingTask}
       onMoveTask={async (taskId, columnId, previousId, nextId, snapshot) => {
         const result = await moveTask({ boardId: board.id, taskId, columnId, previousId, nextId });
         if (!result.ok) { setColumns(snapshot); toast.error(result.error); } else router.refresh();
@@ -240,11 +245,11 @@ export function BoardOverview({ board, columns: initialColumns, labels: initialL
       }} /> : (
       <section className="board-detail-empty">
         <span className="boards-empty-icon"><SquareKanban size={23} /></span>
-        <h2>Your board is ready</h2><p>Create your first column to start organizing tasks.</p>
-        <ColumnDialog boardId={board.id} mode="create" trigger={<Button type="button" variant="default"><Plus size={16} /> Create your first column</Button>} />
+        <h2>{canEdit ? "Your board is ready" : "This board is empty"}</h2><p>{canEdit ? "Create your first column to start organizing tasks." : "The owner has not added any columns yet."}</p>
+        {canEdit && <ColumnDialog boardId={board.id} mode="create" trigger={<Button type="button" variant="default"><Plus size={16} /> Create your first column</Button>} />}
       </section>
     )}
-    <TaskDialog key={`${editingTask?.id ?? "new-task"}-${taskOpen ? "open" : "closed"}`} boardId={board.id} columns={columns.map(({ id, title }) => ({ id, title }))} labels={labels} onLabelsChange={setLabels} task={editingTask} open={taskOpen} onOpenChange={(open) => { setTaskOpen(open); if (!open) setEditingTask(undefined); }} onSave={saveTask} />
-    <DeleteTaskDialog task={deletingTask} open={Boolean(deletingTask)} onOpenChange={(open) => { if (!open) setDeletingTask(undefined); }} onDelete={removeTask} />
+    {canEdit && <TaskDialog key={`${editingTask?.id ?? "new-task"}-${taskOpen ? "open" : "closed"}`} boardId={board.id} columns={columns.map(({ id, title }) => ({ id, title }))} labels={labels} onLabelsChange={setLabels} task={editingTask} open={taskOpen} onOpenChange={(open) => { setTaskOpen(open); if (!open) setEditingTask(undefined); }} onSave={saveTask} />}
+    {canEdit && <DeleteTaskDialog task={deletingTask} open={Boolean(deletingTask)} onOpenChange={(open) => { if (!open) setDeletingTask(undefined); }} onDelete={removeTask} />}
   </>;
 }

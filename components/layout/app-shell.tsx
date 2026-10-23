@@ -10,7 +10,6 @@ import {
   PanelLeft,
   Plus,
   Search,
-  Share2,
   SquareKanban,
   Users,
   X,
@@ -19,10 +18,11 @@ import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { Suspense, useState, type ReactNode } from "react";
 import { BoardDialog } from "@/components/board/board-dialog";
+import { BoardSharePopover } from "@/components/board/board-share-popover";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import type { BoardSummary } from "@/lib/boards";
+import type { BoardDisplaySummary, BoardSummary } from "@/lib/boards";
 
 function AuthControl({ inSidebar = false }: { inSidebar?: boolean }) {
   return (
@@ -42,11 +42,13 @@ function SidebarContents({
   onCollapse,
   boards,
   currentBoard,
+  canCreateBoard,
   pageTitle,
 }: {
   onCollapse: () => void;
   boards: BoardSummary[];
-  currentBoard?: BoardSummary;
+  currentBoard?: BoardDisplaySummary;
+  canCreateBoard: boolean;
   pageTitle: string;
 }) {
   const switcherBoard = currentBoard ?? boards[0];
@@ -93,15 +95,15 @@ function SidebarContents({
               </Link>
             </DropdownMenuItem>
           ))}
-          {!boards.length && <p className="board-switcher-empty">Create a board to get started.</p>}
+          {!boards.length && <p className="board-switcher-empty">{canCreateBoard ? "Create a board to get started." : "Sign in to create your own board."}</p>}
         </DropdownMenuContent>
       </DropdownMenu>
 
       <nav className="sidebar-nav" aria-label="Main navigation">
-        <Link className={!currentBoard ? "sidebar-nav-link active" : "sidebar-nav-link"} href="/boards">
+        <Link className={!currentBoard && pageTitle !== "Explore" ? "sidebar-nav-link active" : "sidebar-nav-link"} href="/boards">
           <LayoutGrid size={17} strokeWidth={1.7} /> <span>All Boards</span>
         </Link>
-        <Link className="sidebar-nav-link" href="/explore">
+        <Link className={pageTitle === "Explore" ? "sidebar-nav-link active" : "sidebar-nav-link"} href="/explore">
           <Compass size={17} strokeWidth={1.7} /> <span>Explore</span>
         </Link>
       </nav>
@@ -109,7 +111,7 @@ function SidebarContents({
       <div className="sidebar-section-heading">
         <span><ChevronDown size={14} /> Boards</span>
         <span className="sidebar-section-actions">
-          <BoardDialog trigger={<button type="button" aria-label="Create board"><Plus size={16} /></button>} />
+          {canCreateBoard && <BoardDialog trigger={<button type="button" aria-label="Create board"><Plus size={16} /></button>} />}
         </span>
       </div>
       <nav className="board-list" aria-label="Your boards">
@@ -131,10 +133,12 @@ function SidebarContents({
 function BoardRail({
   boards,
   currentBoard,
+  canCreateBoard,
   onOpenSidebar,
 }: {
   boards: BoardSummary[];
-  currentBoard?: BoardSummary;
+  currentBoard?: BoardDisplaySummary;
+  canCreateBoard: boolean;
   onOpenSidebar: () => void;
 }) {
   return (
@@ -154,7 +158,7 @@ function BoardRail({
         ))}
       </div>
       <div className="rail-divider" />
-      <BoardDialog trigger={<button className="rail-create" type="button" aria-label="Create board"><Plus size={18} /></button>} />
+      {canCreateBoard && <BoardDialog trigger={<button className="rail-create" type="button" aria-label="Create board"><Plus size={18} /></button>} />}
       <div className="rail-bottom-spacer" />
       <div className="rail-user"><AuthControl /></div>
     </aside>
@@ -166,11 +170,15 @@ export function AppShell({
   boards,
   currentBoard,
   pageTitle = "Your boards",
+  canManageBoard = false,
+  canCreateBoard = true,
 }: {
   children: ReactNode;
   boards: BoardSummary[];
-  currentBoard?: BoardSummary;
+  currentBoard?: BoardDisplaySummary;
   pageTitle?: string;
+  canManageBoard?: boolean;
+  canCreateBoard?: boolean;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
@@ -181,9 +189,9 @@ export function AppShell({
 
   return (
     <div className="app-shell" data-sidebar-open={sidebarOpen}>
-      <BoardRail boards={boards} currentBoard={currentBoard} onOpenSidebar={() => setSidebarOpen(true)} />
+      <BoardRail boards={boards} currentBoard={currentBoard} canCreateBoard={canCreateBoard} onOpenSidebar={() => setSidebarOpen(true)} />
       <aside className={sidebarOpen ? "app-sidebar is-visible" : "app-sidebar"} aria-label="Board sidebar">
-        <SidebarContents onCollapse={() => setSidebarOpen(false)} boards={boards} currentBoard={currentBoard} pageTitle={pageTitle} />
+        <SidebarContents onCollapse={() => setSidebarOpen(false)} boards={boards} currentBoard={currentBoard} canCreateBoard={canCreateBoard} pageTitle={pageTitle} />
       </aside>
       <button
         type="button"
@@ -204,7 +212,7 @@ export function AppShell({
           {currentBoard && (
             <div className="header-actions">
               <Button type="button" variant="outline" size="icon" className="header-icon-button" onClick={focusTaskSearch} aria-label="Focus task search"><Search size={16} /></Button>
-              <Button type="button" variant="outline" size="icon" className="header-icon-button" aria-label="Share board"><Share2 size={16} /></Button>
+              {canManageBoard && <BoardSharePopover board={currentBoard} />}
             </div>
           )}
         </header>
@@ -216,7 +224,7 @@ export function AppShell({
             <span>Navigation</span>
             <button type="button" className="icon-button" onClick={() => setMobileSheetOpen(false)} aria-label="Close navigation"><X size={17} /></button>
           </div>
-          <SidebarContents onCollapse={() => setMobileSheetOpen(false)} boards={boards} currentBoard={currentBoard} pageTitle={pageTitle} />
+          <SidebarContents onCollapse={() => setMobileSheetOpen(false)} boards={boards} currentBoard={currentBoard} canCreateBoard={canCreateBoard} pageTitle={pageTitle} />
         </SheetContent>
       </Sheet>
     </div>

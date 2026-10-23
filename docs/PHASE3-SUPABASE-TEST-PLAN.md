@@ -60,4 +60,14 @@ end $$;
 3. On User B's page, run **Check owner-only update** on the public fixture. It must report that RLS denied the write. Copy the private fixture's board ID from User A's page and try it in **Check a board by ID** as User B; this must also be denied.
 4. Sign out and confirm `/supabase-check` redirects to sign-in.
 
+## Phase 11 public board verification
+
+Use the public and private fixture boards above. The board IDs are visible on User A's `/supabase-check` page.
+
+1. While signed in as User B, open the public fixture at `/boards/<public-board-id>`. The board, columns, tasks, and labels should load. The header should show **View only**; board settings, task/column menus, add controls, and drag handles should be absent.
+2. As User B, open `/boards/<private-board-id>`. The route should return a 404 without identifying the board.
+3. Open `/explore` as User B and confirm the public fixture appears without owner information.
+4. Sign out. Open the public board link and `/explore`; both should load read-only. Open the private board link; it should return a 404. The public board page should prompt the visitor to sign in to create a board.
+5. The existing User B owner-only update check on the public fixture must still report that RLS denied the write. This policy check is independent of the hidden UI controls.
+
 The fixture rows are intentionally retained so both accounts can inspect them. The board management phase will add normal UI for removing them.
