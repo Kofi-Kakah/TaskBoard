@@ -8,14 +8,14 @@ import { TaskCard } from "@/components/board/task-card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ColumnSummary } from "@/lib/columns";
-import type { TaskRow } from "@/types/database";
+import type { TaskWithLabels } from "@/types/database";
 
 function ColumnCard({ boardId, column, onQuickAdd, onEditTask, onDeleteTask }: {
   boardId: string;
   column: ColumnSummary;
   onQuickAdd: (columnId: string, title: string) => Promise<boolean>;
-  onEditTask: (task: TaskRow) => void;
-  onDeleteTask: (task: TaskRow) => void;
+  onEditTask: (task: TaskWithLabels) => void;
+  onDeleteTask: (task: TaskWithLabels) => void;
 }) {
   const [dialogMode, setDialogMode] = useState<ColumnDialogMode | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -83,8 +83,8 @@ export function BoardColumns({ boardId, columns, onQuickAdd, onEditTask, onDelet
   boardId: string;
   columns: ColumnSummary[];
   onQuickAdd: (columnId: string, title: string) => Promise<boolean>;
-  onEditTask: (task: TaskRow) => void;
-  onDeleteTask: (task: TaskRow) => void;
+  onEditTask: (task: TaskWithLabels) => void;
+  onDeleteTask: (task: TaskWithLabels) => void;
 }) {
   return <section className="kanban-board" aria-label="Board columns">
     {columns.map((column) => <ColumnCard key={column.id} boardId={boardId} column={column} onQuickAdd={onQuickAdd} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />)}

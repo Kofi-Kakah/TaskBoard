@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { BoardOverview } from "@/components/board/board-overview";
 import { getOwnedBoards } from "@/lib/boards";
 import { getBoardColumns } from "@/lib/columns";
+import { getBoardLabels } from "@/lib/labels";
 import { boardIdSchema } from "@/lib/validation/boards";
 
 export default async function BoardPage({ params }: { params: Promise<{ boardId: string }> }) {
@@ -20,13 +21,13 @@ export default async function BoardPage({ params }: { params: Promise<{ boardId:
     const board = result.data.find((item) => item.id === parsedId.data);
     if (!board) notFound();
 
-    const columnsResult = await getBoardColumns(board.id);
-    if (!columnsResult.ok) {
+    const [columnsResult, labelsResult] = await Promise.all([getBoardColumns(board.id), getBoardLabels(board.id)]);
+    if (!columnsResult.ok || !labelsResult.ok) {
       return (
         <AppShell boards={result.data} currentBoard={board}>
           <section className="boards-content-state" role="alert">
             <h2>Columns could not load</h2>
-            <p>{columnsResult.error}</p>
+            <p>{!columnsResult.ok ? columnsResult.error : !labelsResult.ok ? labelsResult.error : "Board data could not be loaded."}</p>
             <Link className="ui-button" href={`/boards/${board.id}`}>Retry</Link>
           </section>
         </AppShell>
@@ -39,6 +40,7 @@ export default async function BoardPage({ params }: { params: Promise<{ boardId:
           key={columnsResult.data.map((column) => `${column.id}:${column.updated_at}:${column.tasks.map((task) => `${task.id}:${task.updated_at}`).join(",")}`).join("|")}
           board={board}
           columns={columnsResult.data}
+          labels={labelsResult.data}
         />
       </AppShell>
     );

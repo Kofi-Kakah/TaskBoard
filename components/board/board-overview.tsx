@@ -16,17 +16,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import type { BoardSummary } from "@/lib/boards";
 import type { ColumnSummary } from "@/lib/columns";
 import type { TaskFormValues } from "@/lib/validation/tasks";
-import type { TaskRow } from "@/types/database";
+import type { LabelRow, TaskWithLabels } from "@/types/database";
 
-export function BoardOverview({ board, columns: initialColumns }: { board: BoardSummary; columns: ColumnSummary[] }) {
+export function BoardOverview({ board, columns: initialColumns, labels: initialLabels }: { board: BoardSummary; columns: ColumnSummary[]; labels: LabelRow[] }) {
   const router = useRouter();
   const [columns, setColumns] = useState(initialColumns);
+  const [labels, setLabels] = useState(initialLabels);
   const [taskOpen, setTaskOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<TaskRow>();
-  const [deletingTask, setDeletingTask] = useState<TaskRow>();
+  const [editingTask, setEditingTask] = useState<TaskWithLabels>();
+  const [deletingTask, setDeletingTask] = useState<TaskWithLabels>();
   const [newColumnOpen, setNewColumnOpen] = useState(false);
 
-  function replaceTask(task: TaskRow) {
+  function replaceTask(task: TaskWithLabels) {
     setColumns((current) => current.map((column) => {
       if (column.id !== task.column_id) return column;
       const exists = column.tasks.some((item) => item.id === task.id);
@@ -34,10 +35,10 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
     }));
   }
 
-  async function saveTask(values: TaskFormValues, task?: TaskRow): Promise<TaskActionResult> {
+  async function saveTask(values: TaskFormValues, task?: TaskWithLabels): Promise<TaskActionResult> {
     const columnId = task?.column_id ?? values.columnId;
     const snapshot = columns;
-    const optimisticTask: TaskRow = {
+    const optimisticTask: TaskWithLabels = {
       id: task?.id ?? `optimistic-${crypto.randomUUID()}`,
       board_id: board.id,
       column_id: columnId,
@@ -49,6 +50,7 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
       created_by: task?.created_by ?? null,
       created_at: task?.created_at ?? new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      labels: labels.filter((label) => values.labelIds.includes(label.id)),
     };
 
     if (task) {
@@ -58,7 +60,7 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
     }
 
     const result = task
-      ? await updateTask({ boardId: board.id, taskId: task.id, title: values.title, description: values.description, priority: values.priority, dueDate: values.dueDate })
+      ? await updateTask({ boardId: board.id, taskId: task.id, title: values.title, description: values.description, priority: values.priority, dueDate: values.dueDate, labelIds: values.labelIds })
       : await createTask({ ...values, boardId: board.id, columnId });
 
     if (!result.ok) {
@@ -72,13 +74,14 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
 
   async function quickAdd(columnId: string, title: string) {
     const snapshot = columns;
-    const optimisticTask: TaskRow = {
+    const optimisticTask: TaskWithLabels = {
       id: `optimistic-${crypto.randomUUID()}`, board_id: board.id, column_id: columnId,
       title, description: null, priority: "medium", due_date: null, position: `z${Date.now()}`,
       created_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      labels: [],
     };
     setColumns((current) => current.map((column) => column.id === columnId ? { ...column, taskCount: column.taskCount + 1, tasks: [...column.tasks, optimisticTask] } : column));
-    const result = await createTask({ boardId: board.id, columnId, title, description: "", priority: "medium", dueDate: "" });
+    const result = await createTask({ boardId: board.id, columnId, title, description: "", priority: "medium", dueDate: "", labelIds: [] });
     if (!result.ok) {
       setColumns(snapshot);
       toast.error(result.error);
@@ -89,7 +92,7 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
     return true;
   }
 
-  async function removeTask(task: TaskRow) {
+  async function removeTask(task: TaskWithLabels) {
     const snapshot = columns;
     setColumns((current) => current.map((column) => column.id === task.column_id
       ? { ...column, taskCount: Math.max(0, column.taskCount - 1), tasks: column.tasks.filter((item) => item.id !== task.id) }
@@ -122,7 +125,11 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
           </DropdownMenu>
         </div>
         <ColumnDialog boardId={board.id} mode="create" open={newColumnOpen} onOpenChange={setNewColumnOpen} />
-        <BoardDialog board={board} trigger={<Button type="button" variant="outline">Board settings</Button>} />
+        <BoardDialog board={board} labels={labels} onLabelsChange={(nextLabels) => {
+          setLabels(nextLabels);
+          const labelsById = new Map(nextLabels.map((label) => [label.id, label]));
+          setColumns((current) => current.map((column) => ({ ...column, tasks: column.tasks.map((task) => ({ ...task, labels: task.labels.flatMap((label) => labelsById.has(label.id) ? [labelsById.get(label.id)!] : []) })) })));
+        }} trigger={<Button type="button" variant="outline">Board settings</Button>} />
         <DeleteBoardDialog board={board} redirectAfterDelete trigger={<Button type="button" variant="outline" className="danger-outline">Delete board</Button>} />
       </div>
     </section>
@@ -133,7 +140,7 @@ export function BoardOverview({ board, columns: initialColumns }: { board: Board
         <ColumnDialog boardId={board.id} mode="create" trigger={<Button type="button" variant="default"><Plus size={16} /> Create your first column</Button>} />
       </section>
     )}
-    <TaskDialog key={`${editingTask?.id ?? "new-task"}-${taskOpen ? "open" : "closed"}`} boardId={board.id} columns={columns.map(({ id, title }) => ({ id, title }))} task={editingTask} open={taskOpen} onOpenChange={(open) => { setTaskOpen(open); if (!open) setEditingTask(undefined); }} onSave={saveTask} />
+    <TaskDialog key={`${editingTask?.id ?? "new-task"}-${taskOpen ? "open" : "closed"}`} boardId={board.id} columns={columns.map(({ id, title }) => ({ id, title }))} labels={labels} onLabelsChange={setLabels} task={editingTask} open={taskOpen} onOpenChange={(open) => { setTaskOpen(open); if (!open) setEditingTask(undefined); }} onSave={saveTask} />
     <DeleteTaskDialog task={deletingTask} open={Boolean(deletingTask)} onOpenChange={(open) => { if (!open) setDeletingTask(undefined); }} onDelete={removeTask} />
   </>;
 }

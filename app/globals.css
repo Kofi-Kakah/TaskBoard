@@ -423,6 +423,32 @@ button { cursor: pointer; }
 .due-date-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .due-date-popover { width: auto; padding: 10px; }
 .due-date-clear { width: 100%; min-height: 30px; margin-top: 4px; color: var(--text-muted); font-size: 11px; }
+.board-settings-labels { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 5px 0; }
+.label-manager-trigger { min-height: 32px; font-size: 11px; }
+.board-label-list { display: flex; max-height: 260px; flex-direction: column; gap: 6px; overflow-y: auto; margin-top: 14px; }
+.board-label-empty { margin: 4px 0; color: var(--text-subtle); font-size: 12px; }
+.board-label-row { display: flex; min-height: 38px; align-items: center; gap: 8px; padding: 4px 7px; border: 1px solid var(--border); border-radius: 8px; background: white; }
+.board-label-row.is-editing { flex-wrap: wrap; padding: 9px; }
+.board-label-row.is-editing .ui-input { min-width: 140px; flex: 1; }
+.board-label-swatch { width: 11px; height: 11px; flex: 0 0 11px; border-radius: 4px; }
+.board-label-name { min-width: 0; flex: 1; overflow: hidden; color: var(--text); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.label-delete-button { color: #b42318; }
+.board-label-create { display: flex; flex-direction: column; gap: 7px; margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border); }
+.board-label-create-row { display: flex; gap: 7px; }
+.board-label-create-row .ui-button { min-height: 36px; }
+.label-color-options { display: flex; flex-wrap: wrap; gap: 3px; }
+.label-color-options .board-color-option { width: 27px; height: 27px; }
+.label-color-options .board-color-option > span { width: 17px; height: 17px; }
+.task-label-picker { display: flex; min-width: 0; flex-direction: column; gap: 7px; margin: 2px 0; padding: 0; border: 0; }
+.task-label-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.task-label-option { display: inline-flex; max-width: 100%; min-height: 28px; align-items: center; gap: 6px; padding: 0 8px; overflow: hidden; border: 1px solid var(--border-strong); border-radius: 6px; background: white; color: var(--text-muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.task-label-option.is-selected { border-color: #84caff; background: var(--primary-soft); color: #175cd3; }
+.task-label-option-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 3px; }
+.task-label-empty { margin: 0; }
+.task-create-label-button { align-self: flex-start; min-height: 28px; padding: 0 5px; color: var(--primary); font-size: 11px; }
+.task-inline-label-form { display: flex; flex-direction: column; gap: 6px; padding: 9px; border: 1px solid var(--border); border-radius: 8px; background: #fcfcfd; }
+.task-inline-label-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.task-inline-label-actions .ui-button { min-height: 30px; font-size: 11px; }
 
 .welcome-page { display: grid; min-height: 100dvh; place-items: center; padding: 20px; background: var(--canvas); }
 .welcome-card { display: flex; width: min(100%, 460px); flex-direction: column; align-items: center; padding: 40px 34px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); text-align: center; box-shadow: var(--shadow-card); }

@@ -10,10 +10,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TaskLabelPicker } from "@/components/board/task-label-picker";
 import { formatDateOnly, parseDateOnly } from "@/lib/dates";
 import { taskInputSchema, type TaskFormValues } from "@/lib/validation/tasks";
 import type { TaskActionResult } from "@/actions/tasks";
-import type { TaskRow } from "@/types/database";
+import type { LabelRow, TaskWithLabels } from "@/types/database";
 
 function localDateToString(date: Date) {
   const year = date.getFullYear();
@@ -25,6 +26,8 @@ function localDateToString(date: Date) {
 export function TaskDialog({
   boardId,
   columns,
+  labels,
+  onLabelsChange,
   task,
   open,
   onOpenChange,
@@ -32,10 +35,12 @@ export function TaskDialog({
 }: {
   boardId: string;
   columns: Array<{ id: string; title: string }>;
-  task?: TaskRow;
+  labels: LabelRow[];
+  onLabelsChange: (labels: LabelRow[]) => void;
+  task?: TaskWithLabels;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (values: TaskFormValues, task?: TaskRow) => Promise<TaskActionResult>;
+  onSave: (values: TaskFormValues, task?: TaskWithLabels) => Promise<TaskActionResult>;
 }) {
   const [pending, setPending] = useState(false);
   const form = useForm<TaskFormValues>({
@@ -47,6 +52,7 @@ export function TaskDialog({
       description: task?.description ?? "",
       priority: task?.priority ?? "medium",
       dueDate: task?.due_date ?? "",
+      labelIds: task?.labels.map((label) => label.id) ?? [],
     },
   });
   const dueDateValue = useWatch({ control: form.control, name: "dueDate" });
@@ -100,6 +106,10 @@ export function TaskDialog({
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
+
+          <Controller control={form.control} name="labelIds" render={({ field }) => (
+            <TaskLabelPicker boardId={boardId} labels={labels} selectedIds={field.value} onChange={field.onChange} onLabelsChange={onLabelsChange} />
+          )} />
 
           <span className="board-field-label">Due date <span>Optional</span></span>
           <Controller

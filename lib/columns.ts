@@ -1,9 +1,9 @@
 import "server-only";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ColumnRow, TaskRow } from "@/types/database";
+import type { ColumnRow, LabelRow, TaskWithLabels } from "@/types/database";
 
-export type ColumnSummary = ColumnRow & { taskCount: number; tasks: TaskRow[] };
+export type ColumnSummary = ColumnRow & { taskCount: number; tasks: TaskWithLabels[] };
 
 export type ColumnListResult =
   | { ok: true; data: ColumnSummary[] }
@@ -30,10 +30,32 @@ export async function getBoardColumns(boardId: string): Promise<ColumnListResult
 
     if (tasksError || !tasks) return { ok: false, error: "Column task counts could not be loaded. Try again." };
 
-    const tasksByColumn = new Map<string, TaskRow[]>();
+    const { data: taskLabels, error: taskLabelsError } = tasks.length
+      ? await supabase.from("task_labels").select("task_id, label_id").in("task_id", tasks.map((task) => task.id))
+      : { data: [], error: null };
+    if (taskLabelsError || !taskLabels) return { ok: false, error: "Task labels could not be loaded. Try again." };
+
+    const labelIds = [...new Set(taskLabels.map((taskLabel) => taskLabel.label_id))];
+    let labels: LabelRow[] = [];
+    if (labelIds.length) {
+      const { data, error } = await supabase.from("labels").select("id, board_id, name, color").in("id", labelIds);
+      if (error || !data) return { ok: false, error: "Task labels could not be loaded. Try again." };
+      labels = data;
+    }
+    const labelsById = new Map(labels.map((label) => [label.id, label]));
+    const labelsByTask = new Map<string, LabelRow[]>();
+    for (const assignment of taskLabels) {
+      const label = labelsById.get(assignment.label_id);
+      if (!label) continue;
+      const taskLabelList = labelsByTask.get(assignment.task_id) ?? [];
+      taskLabelList.push(label);
+      labelsByTask.set(assignment.task_id, taskLabelList);
+    }
+
+    const tasksByColumn = new Map<string, TaskWithLabels[]>();
     for (const task of tasks) {
       const columnTasks = tasksByColumn.get(task.column_id) ?? [];
-      columnTasks.push(task);
+      columnTasks.push({ ...task, labels: labelsByTask.get(task.id) ?? [] });
       tasksByColumn.set(task.column_id, columnTasks);
     }
 

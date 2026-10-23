@@ -9,6 +9,7 @@ export const taskInputSchema = z.object({
   description: z.string().max(2000, "Descriptions can be up to 2000 characters."),
   priority: z.enum(["low", "medium", "high"]),
   dueDate: z.string().refine((value) => value === "" || parseDateOnly(value) !== null, "Choose a valid due date."),
+  labelIds: z.array(boardIdSchema).max(100, "Choose up to 100 labels.").refine((ids) => new Set(ids).size === ids.length, "A label can only be assigned once."),
 });
 
 export const taskUpdateSchema = taskInputSchema.omit({ columnId: true }).extend({ taskId: boardIdSchema });

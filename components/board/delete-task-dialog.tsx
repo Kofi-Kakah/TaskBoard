@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import type { TaskRow } from "@/types/database";
+import type { TaskWithLabels } from "@/types/database";
 
 export function DeleteTaskDialog({
   task,
@@ -12,10 +12,10 @@ export function DeleteTaskDialog({
   onOpenChange,
   onDelete,
 }: {
-  task?: TaskRow;
+  task?: TaskWithLabels;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onDelete: (task: TaskRow) => Promise<boolean>;
+  onDelete: (task: TaskWithLabels) => Promise<boolean>;
 }) {
   const [pending, startTransition] = useTransition();
 

@@ -7,10 +7,12 @@ import { createBoard, updateBoard } from "@/actions/boards";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { BoardLabelManager } from "@/components/board/board-label-manager";
 import { boardColors, resolveBoardColor } from "@/lib/validation/boards";
 import type { BoardRow } from "@/types/database";
+import type { LabelRow } from "@/types/database";
 
-export function BoardDialog({ board, trigger }: { board?: BoardRow; trigger: ReactNode }) {
+export function BoardDialog({ board, trigger, labels = [], onLabelsChange }: { board?: BoardRow; trigger: ReactNode; labels?: LabelRow[]; onLabelsChange?: (labels: LabelRow[]) => void }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -48,6 +50,7 @@ export function BoardDialog({ board, trigger }: { board?: BoardRow; trigger: Rea
           {board ? "Update this board's name, color, or visibility." : "Give your new board a name and choose who can see it."}
         </DialogDescription>
         <form className="board-dialog-form" onSubmit={handleSubmit}>
+          {board && onLabelsChange && <div className="board-settings-labels"><span className="board-field-label">Labels</span><BoardLabelManager boardId={board.id} labels={labels} onLabelsChange={onLabelsChange} /></div>}
           <label className="board-field-label" htmlFor={`board-title-${board?.id ?? "new"}`}>Board name</label>
           <Input
             id={`board-title-${board?.id ?? "new"}`}

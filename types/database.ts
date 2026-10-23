@@ -60,6 +60,8 @@ export type TaskLabelRow = {
   label_id: string;
 };
 
+export type TaskWithLabels = TaskRow & { labels: LabelRow[] };
+
 export type Database = {
   public: {
     Tables: {
