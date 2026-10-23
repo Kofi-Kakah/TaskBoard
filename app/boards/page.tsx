@@ -1,12 +1,19 @@
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { AppShell } from "@/components/layout/app-shell";
+import { BoardsDashboard } from "@/components/board/boards-dashboard";
+import { getOwnedBoards } from "@/lib/boards";
 
 export default async function BoardsPage() {
-  await auth.protect();
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const result = await getOwnedBoards(userId);
+  const boards = result.ok ? result.data : [];
 
   return (
-    <main className="protected-placeholder">
-      <h1>Your boards</h1>
-      <p>Your board list will be available here.</p>
-    </main>
+    <AppShell boards={boards} pageTitle="Your boards">
+      <BoardsDashboard result={result} />
+    </AppShell>
   );
 }
