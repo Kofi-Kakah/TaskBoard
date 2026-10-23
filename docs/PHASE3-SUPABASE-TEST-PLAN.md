@@ -16,7 +16,19 @@ Open the Supabase **SQL Editor**, paste the complete contents of `supabase/migra
 2. Open `http://localhost:3000/supabase-check`.
 3. Confirm the read check succeeds. Select **Run authenticated write check**; it inserts a temporary private board, reads it back under the same Clerk token, and removes that row through the owner delete policy.
 
-## Two-user RLS test
+## Automated RLS policy suite
+
+The pgTAP suite at `supabase/tests/database/rls.test.sql` checks that RLS is enabled on all five application tables, verifies anonymous read-only grants, checks public/private visibility for anonymous visitors and two simulated Clerk users, and asserts that User B cannot insert, update, or delete User A's records. The suite creates random fixtures inside a transaction and rolls everything back.
+
+To run it against the configured Supabase database:
+
+1. In Supabase Dashboard, open **Database → Extensions** and enable `pgtap` if it is not already enabled.
+2. Open **SQL Editor**, paste the contents of `supabase/tests/database/rls.test.sql`, and run it as one script.
+3. Confirm the output reports `1..36` and all 36 tests pass. The final `ROLLBACK` removes the temporary fixture rows.
+
+If the repository is later initialized for Supabase local development, the same test file can be run with `supabase test db`. The current project does not include a Supabase CLI `config.toml`.
+
+## Manual Clerk-backed two-user verification
 
 For an isolated fixture, use the Supabase SQL Editor after the migration. Replace `REPLACE_WITH_USER_A_CLERK_ID` with User A's Clerk ID (the `user_...` value in Clerk Dashboard → Users), then run:
 

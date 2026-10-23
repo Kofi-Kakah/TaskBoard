@@ -191,6 +191,7 @@ export function AppShell({
 
   return (
     <div className="app-shell" data-sidebar-open={sidebarOpen}>
+      <a className="skip-to-content" href="#main-content">Skip to content</a>
       <BoardRail boards={boards} currentBoard={currentBoard} canCreateBoard={canCreateBoard} onOpenSidebar={() => setSidebarOpen(true)} />
       <aside className={sidebarOpen ? "app-sidebar is-visible" : "app-sidebar"} aria-label="Board sidebar">
         <SidebarContents onCollapse={() => setSidebarOpen(false)} boards={boards} currentBoard={currentBoard} canCreateBoard={canCreateBoard} pageTitle={pageTitle} />
@@ -202,7 +203,7 @@ export function AppShell({
         aria-label="Close sidebar"
         tabIndex={sidebarOpen ? 0 : -1}
       />
-      <main className="app-main">
+      <main className="app-main" id="main-content" tabIndex={-1}>
         <header className="board-header">
           <div className="board-heading">
             <button className="mobile-menu-button" type="button" onClick={() => setMobileSheetOpen(true)} aria-label="Open navigation"><Menu size={19} /></button>

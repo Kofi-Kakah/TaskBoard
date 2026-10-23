@@ -141,6 +141,21 @@ button { cursor: pointer; }
   outline-offset: 2px;
 }
 
+.skip-to-content {
+  position: fixed;
+  z-index: 100;
+  top: 12px;
+  left: 12px;
+  transform: translateY(-160%);
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-card-hover);
+}
+.skip-to-content:focus { transform: translateY(0); }
+
 .preview-shell { min-height: 100vh; padding: 32px; }
 .preview-heading { max-width: 1080px; margin: 0 auto 24px; }
 .preview-heading h1 { margin: 0 0 6px; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
@@ -210,6 +225,7 @@ button { cursor: pointer; }
 
 .app-shell { display: grid; width: 100%; height: 100dvh; grid-template-columns: 64px 252px minmax(0, 1fr); gap: 12px; padding: 12px; overflow: hidden; }
 .app-shell[data-sidebar-open="false"] { grid-template-columns: 64px minmax(0, 1fr); }
+.sidebar-backdrop { display: none; }
 .app-rail { display: flex; min-height: 0; flex-direction: column; align-items: center; padding: 7px 0; }
 .rail-menu-button, .rail-create { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--text-muted); }
 .rail-menu-button:hover, .rail-create:hover { border-color: var(--border); background: var(--surface); color: var(--text); }
@@ -581,6 +597,15 @@ button { cursor: pointer; }
   .mobile-navigation-sheet .sidebar-auth { display: flex; gap: 14px; }
   .mobile-navigation-sheet .sidebar-auth .auth-link { color: var(--primary); font-size: 12px; }
   .mobile-navigation-sheet .sidebar-collapse { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer base {
