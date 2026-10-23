@@ -35,7 +35,11 @@ export default async function BoardPage({ params }: { params: Promise<{ boardId:
 
     return (
       <AppShell boards={result.data} currentBoard={board}>
-        <BoardOverview board={board} columns={columnsResult.data} />
+        <BoardOverview
+          key={columnsResult.data.map((column) => `${column.id}:${column.updated_at}:${column.tasks.map((task) => `${task.id}:${task.updated_at}`).join(",")}`).join("|")}
+          board={board}
+          columns={columnsResult.data}
+        />
       </AppShell>
     );
   }

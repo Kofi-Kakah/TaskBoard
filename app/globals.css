@@ -306,12 +306,24 @@ button { cursor: pointer; }
 .column-header-spacer { flex: 1; }
 .column-menu-button, .column-add-button { width: 25px; height: 25px; flex: 0 0 25px; }
 .kanban-column-cards { display: flex; min-height: 0; flex: 1; flex-direction: column; gap: 11px; overflow-x: hidden; overflow-y: auto; padding: 1px 1px 5px; scrollbar-color: #d0d5dd transparent; scrollbar-width: thin; }
-.kanban-task-card { min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow-card); transition: box-shadow 140ms ease, transform 140ms ease; }
+.kanban-task-card { position: relative; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow-card); transition: box-shadow 140ms ease, transform 140ms ease; }
 .kanban-task-card:hover, .kanban-task-card:focus-visible { box-shadow: var(--shadow-card-hover); }
-.task-card-heading { display: flex; min-width: 0; align-items: center; gap: 7px; }
+.task-card-heading { display: flex; min-width: 0; align-items: center; gap: 5px; }
+.task-card-open { display: flex; min-width: 0; flex: 1; align-items: center; gap: 7px; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.task-card-content { width: 100%; flex-direction: column; align-items: stretch; }
+.task-card-open:focus-visible { border-radius: 5px; outline: 2px solid var(--primary); outline-offset: 2px; }
 .task-label-marker { display: grid; width: 20px; height: 20px; flex: 0 0 20px; place-items: center; border-radius: 5px; }
-.task-card-heading h3 { overflow: hidden; min-width: 0; flex: 1; margin: 0; color: var(--text); font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-.task-menu-button { width: 24px; height: 24px; flex: 0 0 24px; }
+.task-card-title { overflow: hidden; min-width: 0; flex: 1; color: var(--text); font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.task-menu-button { position: absolute; top: 10px; right: 10px; z-index: 1; width: 24px; height: 24px; }
+.task-card-content .task-card-heading { padding-right: 25px; }
+.column-add-button { border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text-muted); }
+.column-add-button:hover { border-color: var(--border); background: white; color: var(--primary); }
+.quick-task-composer { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--border-strong); border-radius: 10px; background: white; box-shadow: var(--shadow-card); }
+.quick-task-composer input { width: 100%; height: 34px; padding: 0 9px; border: 1px solid var(--border-strong); border-radius: 7px; color: var(--text); font-size: 12px; }
+.quick-task-composer input:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.quick-task-composer > div { display: flex; align-items: center; justify-content: space-between; gap: 6px; color: var(--text-subtle); font-size: 10px; }
+.quick-task-composer button { padding: 5px 8px; border: 0; border-radius: 6px; background: var(--primary); color: white; font-size: 11px; cursor: pointer; }
+.quick-task-composer button:disabled { opacity: .55; cursor: default; }
 .task-card-description { overflow: hidden; margin: 7px 0 8px; color: var(--text-muted); font-size: 11px; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
 .task-card-due { display: flex; min-height: 18px; align-items: center; gap: 5px; margin: 0 0 9px; color: var(--text-muted); font-size: 10px; }
 .task-card-due svg { color: var(--text-subtle); }
@@ -404,6 +416,13 @@ button { cursor: pointer; }
 .board-color-option.is-selected { border-color: var(--text); }
 .board-color-option > span { width: 20px; height: 20px; border-radius: 6px; }
 .board-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.task-dialog-form { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.task-field-meta { display: flex; justify-content: flex-end; gap: 8px; color: var(--text-subtle); font-size: 10px; }
+.field-error { color: #b42318; font-size: 11px; }
+.due-date-trigger { display: flex; width: 100%; height: 36px; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: white; color: var(--text-muted); font-size: 12px; text-align: left; }
+.due-date-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.due-date-popover { width: auto; padding: 10px; }
+.due-date-clear { width: 100%; min-height: 30px; margin-top: 4px; color: var(--text-muted); font-size: 11px; }
 
 .welcome-page { display: grid; min-height: 100dvh; place-items: center; padding: 20px; background: var(--canvas); }
 .welcome-card { display: flex; width: min(100%, 460px); flex-direction: column; align-items: center; padding: 40px 34px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); text-align: center; box-shadow: var(--shadow-card); }
