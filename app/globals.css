@@ -380,6 +380,16 @@ button { cursor: pointer; }
 .board-overview-toolbar { min-height: 57px; flex: 0 0 57px; border-bottom: 1px solid var(--border); }
 .board-overview-stats { display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 12px; }
 .board-detail-empty { flex: 1; }
+.kanban-column-empty { margin: 3px 2px; padding: 17px 10px; border: 1px dashed var(--border-strong); border-radius: 10px; color: var(--text-subtle); font-size: 12px; text-align: center; }
+.menu-item-danger { color: #b42318; }
+.menu-item-danger[data-highlighted] { background: #fff1f0; color: #b42318; }
+.board-loading { display: flex; min-height: 0; flex: 1; flex-direction: column; gap: 12px; overflow: hidden; padding: 15px; }
+.board-loading-toolbar { display: flex; min-height: 40px; align-items: center; justify-content: flex-end; gap: 8px; }
+.board-loading-toolbar .ui-skeleton { width: 106px; height: 34px; }
+.board-loading-columns { display: grid; grid-auto-columns: minmax(220px, 250px); grid-auto-flow: column; gap: 14px; min-height: 0; flex: 1; overflow: hidden; }
+.board-loading-column { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 15px; background: var(--column-bg); }
+.board-loading-title { width: 55%; height: 25px; }
+.board-loading-card { height: 96px; border: 1px solid var(--border); border-radius: 11px; background-color: var(--surface); }
 
 .board-dialog-form { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
 .board-field-label { margin: 5px 0 0; color: var(--text); font-size: 12px; font-weight: 500; }
@@ -414,6 +424,9 @@ button { cursor: pointer; }
   .board-overview-stats { gap: 8px; font-size: 10px; }
   .board-overview-toolbar .board-toolbar-actions { gap: 5px; }
   .board-overview-toolbar .ui-button { min-height: 32px; padding-inline: 8px; font-size: 10px; }
+  .board-overview-toolbar { flex-wrap: wrap; justify-content: flex-start; gap: 7px; padding-block: 8px; }
+  .board-overview-toolbar .board-overview-stats { width: 100%; }
+  .board-overview-toolbar .board-toolbar-actions { width: 100%; justify-content: flex-end; }
   .board-detail-empty { padding: 20px 14px; }
 }
 

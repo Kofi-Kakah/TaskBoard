@@ -7,7 +7,7 @@ import { createBoard, updateBoard } from "@/actions/boards";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { boardColors } from "@/lib/validation/boards";
+import { boardColors, resolveBoardColor } from "@/lib/validation/boards";
 import type { BoardRow } from "@/types/database";
 
 export function BoardDialog({ board, trigger }: { board?: BoardRow; trigger: ReactNode }) {
@@ -16,7 +16,7 @@ export function BoardDialog({ board, trigger }: { board?: BoardRow; trigger: Rea
   const [pending, startTransition] = useTransition();
   const [title, setTitle] = useState(board?.title ?? "");
   const [description, setDescription] = useState(board?.description ?? "");
-  const [color, setColor] = useState(board?.color ?? boardColors[1]);
+  const [color, setColor] = useState(resolveBoardColor(board?.color ?? boardColors[1]));
   const [visibility, setVisibility] = useState<"private" | "public">(board?.visibility ?? "private");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
