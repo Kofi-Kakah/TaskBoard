@@ -297,6 +297,22 @@ button { cursor: pointer; }
 .clear-filters:hover { color: var(--primary); }
 .filter-button { min-height: 32px; flex: 0 0 auto; gap: 7px; padding: 0 10px; font-size: 11px; }
 .filter-count { display: grid; width: 17px; height: 17px; place-items: center; border-radius: 5px; background: var(--primary-soft); color: var(--primary); font-size: 10px; font-weight: 600; }
+.filter-summary-muted { color: var(--text-subtle); font-size: 11px; }
+.task-filter-popover { width: 260px; max-height: min(72vh, 520px); overflow-y: auto; padding: 14px; }
+.filter-popover-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; color: var(--text); font-size: 13px; }
+.filter-popover-heading span { color: var(--text-muted); font-size: 11px; }
+.filter-group { display: flex; flex-direction: column; gap: 3px; margin: 0; padding: 10px 0; border: 0; border-top: 1px solid var(--border); }
+.filter-group legend { padding: 0 0 5px; color: var(--text-muted); font-size: 11px; font-weight: 600; }
+.filter-option { display: flex; min-height: 28px; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 6px; color: var(--text); font-size: 12px; cursor: pointer; }
+.filter-option:hover { background: #f8fafc; }
+.filter-option input { width: 14px; height: 14px; margin: 0; accent-color: var(--primary); }
+.priority-dot, .filter-label-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; }
+.priority-dot-high { background: var(--priority-high); }
+.priority-dot-medium { background: var(--priority-medium); }
+.priority-dot-low { background: var(--priority-low); }
+.filter-empty { margin: 2px 4px; color: var(--text-subtle); font-size: 11px; }
+.filter-popover-clear { width: 100%; padding: 8px 4px 1px; border: 0; border-top: 1px solid var(--border); background: transparent; color: var(--primary); font-size: 12px; text-align: left; }
+.board-no-matches { flex: 0 0 auto; padding: 10px 20px 0; color: var(--text-muted); font-size: 12px; }
 .kanban-board { display: grid; min-height: 0; flex: 1; grid-auto-columns: 250px; grid-auto-flow: column; align-items: stretch; gap: 14px; overflow: auto; padding: 14px; overscroll-behavior-x: contain; }
 .kanban-column { display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: 11px; padding: 10px; border: 1px solid transparent; border-radius: 15px; background: var(--column-bg); }
 .kanban-column.is-drop-target, .kanban-column-cards.is-drop-target { background-color: var(--primary-soft); }
@@ -479,7 +495,7 @@ button { cursor: pointer; }
   .board-overview-toolbar .board-toolbar-actions { gap: 5px; }
   .board-overview-toolbar .ui-button { min-height: 32px; padding-inline: 8px; font-size: 10px; }
   .board-overview-toolbar { flex-wrap: wrap; justify-content: flex-start; gap: 7px; padding-block: 8px; }
-  .board-overview-toolbar .board-overview-stats { width: 100%; }
+  .board-overview-toolbar .board-search { width: 100%; }
   .board-overview-toolbar .board-toolbar-actions { width: 100%; justify-content: flex-end; }
   .board-detail-empty { padding: 20px 14px; }
 }
