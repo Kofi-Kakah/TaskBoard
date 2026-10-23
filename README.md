@@ -1,87 +1,181 @@
+<div align="center">
+
 # TaskBoard
 
-TaskBoard is a Trello-style Kanban app built with Next.js, Clerk, and Supabase. It supports private boards, read-only public boards, task labels and due dates, and drag-and-drop ordering.
+### A collaborative Kanban board for organizing work, tracking tasks, and sharing public boards.
 
-## Requirements
+Built with **Next.js**, **TypeScript**, **Clerk**, and **Supabase**.
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Clerk](https://img.shields.io/badge/Auth-Clerk-6C47FF?logo=clerk&logoColor=white)](https://clerk.com/)
+[![Supabase](https://img.shields.io/badge/Database-Supabase-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-RLS-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
+**[Features](#features) · [Quick Start](#quick-start) · [Routes](#application-routes) · [Architecture](#architecture) · [Security](#security)**
+
+</div>
+
+## Table of Contents
+
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [Application Routes](#application-routes)
+- [Architecture](#architecture)
+- [Data Model](#data-model)
+- [Security](#security)
+- [Project Structure](#project-structure)
+- [Available Commands](#available-commands)
+- [Project Notes](#project-notes)
+
+## Features
+
+- **Boards:** create, rename, recolor, change visibility, and delete boards.
+- **Columns:** create, rename, recolor, reorder, and delete columns.
+- **Tasks:** quick-add, create, edit, delete, and move tasks between columns.
+- **Task details:** priorities, descriptions, due dates, and board labels.
+- **Drag and drop:** reorder tasks within and across columns, and reorder columns.
+- **Search and filters:** find tasks by title or description and filter by priority, labels, and due date. The current view is reflected in the URL.
+- **Public sharing:** public boards are viewable without signing in; only their owner can change them. Private boards are hidden from other users.
+- **Responsive layout:** the board adapts to desktop, tablet, and mobile screens.
+
+## Technology Stack
+
+| Area | Technologies |
+|---|---|
+| Web framework | Next.js App Router 16, React 19, TypeScript |
+| Styling | Tailwind CSS 4, Radix UI, shadcn/ui primitives |
+| Authentication | Clerk |
+| Database | Supabase Postgres with Row Level Security |
+| Data access | Supabase JS, Supabase SSR, Next.js Server Components and Server Actions |
+| Board interactions | dnd-kit and fractional indexing |
+| Forms and validation | React Hook Form and Zod |
+| Date handling | date-fns |
+| Notifications | Sonner |
+
+## Quick Start
+
+### Requirements
 
 - Node.js 20 or newer
 - npm
 - A Clerk application
-- A Supabase project with the Clerk third-party auth integration enabled
+- A Supabase project configured for Clerk third-party authentication
 
-## Local setup
+### 1. Install dependencies
 
-1. Install dependencies:
+```bash
+npm ci
+```
 
-   ```bash
-   npm ci
-   ```
+### 2. Configure environment variables
 
-2. Copy `.env.example` to `.env.local` and fill in the four values in your Clerk and Supabase dashboards. Do not use a Supabase secret or service-role key.
+Copy `.env.example` to `.env.local` and add the values from your Clerk and Supabase dashboards. See [Environment Variables](#environment-variables) for the variable list. Use the Supabase publishable key; this app does not need a service-role key.
 
-3. Apply the database schema by pasting `supabase/migrations/20261023120000_taskboard_schema.sql` into the Supabase SQL Editor and running it once. The migration creates the tables, indexes, updated-at triggers, grants, and RLS policies.
+### 3. Configure Clerk and Supabase
 
-4. Start the development server:
+Enable Supabase as a third-party authentication provider in Supabase, and enable the Supabase integration in Clerk. Follow the dashboard walkthrough and verification instructions in the [Supabase test plan](docs/PHASE3-SUPABASE-TEST-PLAN.md).
 
-   ```bash
-   npm run dev
-   ```
+### 4. Apply the database migration
 
-5. Open [http://localhost:3000](http://localhost:3000), sign in, and create a board.
+If the schema has not already been installed in this Supabase project, open the SQL Editor and run [`supabase/migrations/20261023120000_taskboard_schema.sql`](supabase/migrations/20261023120000_taskboard_schema.sql). It creates the application tables, indexes, updated-at triggers, grants, and RLS policies. This is a one-time migration; do not run it again on a database where it has already been applied.
 
-For the Clerk and Supabase dashboard steps, authenticated write check, and two-user RLS verification, see [docs/PHASE3-SUPABASE-TEST-PLAN.md](docs/PHASE3-SUPABASE-TEST-PLAN.md).
+### 5. Start the app
 
-## Environment variables
+```bash
+npm run dev
+```
 
-`.env.example` contains placeholder values only:
+Open [http://localhost:3000](http://localhost:3000). Sign in or create an account, then create a board.
 
-| Variable | Source |
+## Environment Variables
+
+The checked-in `.env.example` contains placeholder values only.
+
+| Variable | Where to find it |
 |---|---|
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk Dashboard → API keys |
 | `CLERK_SECRET_KEY` | Clerk Dashboard → API keys |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Project Settings → Data API |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Dashboard → Project Settings → API Keys |
 
-Only the Supabase publishable key belongs in this app. Row Level Security protects database access; never add a service-role key to the client or environment template.
+Do not expose or configure a Supabase service-role key for this app. Database access uses the signed-in user's Clerk token and is governed by RLS.
 
-## Commands
+## Application Routes
 
-| Command | Purpose |
+| Route | Purpose | Access |
+|---|---|---|
+| `/` | Redirects signed-out visitors to sign-in and signed-in visitors to their boards | Public entry point |
+| `/sign-in` | Clerk sign-in | Public |
+| `/sign-up` | Clerk registration | Public |
+| `/boards` | Dashboard for the user's boards | Signed in |
+| `/boards/[boardId]` | Kanban board | Owner, or anyone for a public board (read-only for non-owners) |
+| `/explore` | Browse public boards | Public |
+| `/design-preview` | Preview the design system | Development/design review |
+| `/supabase-check` | Authenticated database and RLS diagnostics | Signed in |
+
+## Architecture
+
+- **Server Components** load board and task data.
+- **Server Actions** validate and perform board, column, task, label, and ordering mutations.
+- **Clerk** provides sign-in and user identity. Its session token is passed to Supabase through the native third-party auth integration.
+- **Supabase Postgres** stores boards and their content. RLS determines which rows the current user can read or change.
+- **Client components** handle interactive controls, dialogs, search and filtering, and drag-and-drop updates.
+
+## Data Model
+
+| Table | Contents |
+|---|---|
+| `boards` | Board owner, title, description, color, and visibility |
+| `columns` | Board columns and their fractional ordering positions |
+| `tasks` | Task details, priority, due date, column, and position |
+| `labels` | Board-scoped label names and colors |
+| `task_labels` | Many-to-many relationship between tasks and labels |
+
+Clerk user IDs are stored as text. Position keys use fractional indexing and the database's `C` collation for consistent ordering.
+
+## Security
+
+- Row Level Security is enabled on all application tables.
+- Owners can read and manage their own boards and board contents.
+- Anyone, including signed-out visitors, can read public boards and their contents.
+- Private boards are not visible to non-owners; the board route returns not found for them.
+- Public boards are read-only for everyone except the owner.
+- Server Actions validate inputs and enforce ownership before mutations.
+- The app uses a Supabase publishable key and user-scoped Clerk tokens; no service-role key is used in client code.
+
+After configuring Clerk and Supabase, use the [Supabase test plan](docs/PHASE3-SUPABASE-TEST-PLAN.md) to check an authenticated read/write and verify private/public access with two users and a signed-out visitor.
+
+## Project Structure
+
+```text
+app/                         Next.js routes, layouts, loading and error states
+actions/                     Validated Server Actions
+components/board/            Board, column, task, and dialog UI
+components/layout/           Application shell and shared layout
+components/ui/               Styled UI primitives
+lib/                         Supabase clients, data access, validation, and helpers
+supabase/migrations/         Postgres schema and RLS migration
+types/database.ts            Supabase database types
+docs/                        Setup, test plan, and project progress notes
+```
+
+## Available Commands
+
+| Command | Description |
 |---|---|
 | `npm run dev` | Start the local development server |
 | `npm run lint` | Run ESLint |
-| `npm run typecheck` | Run TypeScript without emitting files |
-| `npm run build` | Create the production build |
+| `npm run typecheck` | Run TypeScript type checking without emitting files |
+| `npm run build` | Create a production build |
 | `npm start` | Serve the production build |
 
-## Routes
+## Project Notes
 
-- `/` — redirects signed-out visitors to `/sign-in` and signed-in visitors to `/boards`
-- `/boards` — signed-in user's boards
-- `/boards/[boardId]` — board view; public boards are read-only to non-owners, while private boards return 404 to non-owners
-- `/explore` — public boards
-- `/sign-in` and `/sign-up` — Clerk authentication
-- `/design-preview` — design-system preview
-- `/supabase-check` — authenticated database and RLS diagnostics
-
-## Project structure
-
-- `app/` — App Router pages, route loading and error states, global styles
-- `actions/` — validated Server Actions for boards, columns, tasks, labels, and ordering
-- `components/layout/` — application shell and shared route error UI
-- `components/board/` — board, column, task, and dialog UI
-- `components/ui/` — styled Radix and shadcn primitives
-- `lib/` — Supabase access, data loading, date and ordering helpers, validation schemas
-- `supabase/migrations/` — schema and RLS migration
-- `types/database.ts` — Supabase row types
-- `docs/PROGRESS.md` — phase status and implementation notes
-
-## Data and security
-
-The app uses Clerk IDs as text user IDs and passes the signed-in Clerk token to Supabase's native third-party auth integration. Every application table has RLS enabled. Public boards can be read by signed-in and anonymous visitors; only the owner can write. The server actions validate their inputs, check ownership, and return user-safe errors.
-
-Run the two-user and signed-out verification steps in the test plan after configuring the dashboards. Do not apply the migration repeatedly to a database where it has already been installed; it is a one-time schema migration.
-
-## Design
-
-The interface follows the light design tokens and layout requirements in `AGENTS.md`. The reference image was not provided, so visual review uses those written specifications. The board adapts to desktop, tablet, and mobile widths.
+- Keep `.env.local` private. Only `.env.example` with placeholders belongs in source control.
+- Apply each SQL migration once per database and keep the migration file in source control.
+- See [`docs/PROGRESS.md`](docs/PROGRESS.md) for phase status and implementation notes.
+- The design preview is available at `/design-preview` while the development server is running.
