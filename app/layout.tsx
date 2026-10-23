@@ -1,4 +1,4 @@
-import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -31,20 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             },
           }}
         >
-          <Suspense fallback={<div className="h-[57px] border-b border-border bg-surface" aria-hidden="true" />}>
-            <header className="border-b border-border px-4 py-3 flex items-center justify-between bg-surface">
-              <Show when="signed-out">
-                <div className="flex items-center gap-2">
-                  <SignInButton mode="redirect" />
-                  <SignUpButton mode="redirect" />
-                </div>
-              </Show>
-              <Show when="signed-in">
-                <UserButton />
-              </Show>
-            </header>
-          </Suspense>
-          <Suspense fallback={<main className="min-h-[calc(100vh-57px)]" aria-busy="true" />}>
+          <Suspense fallback={<main className="min-h-screen" aria-busy="true" />}>
             {children}
           </Suspense>
           <Toaster position="bottom-right" theme="light" toastOptions={{ style: { borderColor: "var(--border)", borderRadius: "12px", fontFamily: "var(--font-inter)" } }} />

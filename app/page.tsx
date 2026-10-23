@@ -1,9 +1,10 @@
- 
+import { AppShell } from "@/components/layout/app-shell";
+import { StaticBoard } from "@/components/board/static-board";
 
-export default function Page () {
+export default function HomePage() {
   return (
-    <div>
-      <h1>Hello World</h1>
-    </div>
-  )
+    <AppShell>
+      <StaticBoard />
+    </AppShell>
+  );
 }
