@@ -23,6 +23,7 @@ Built with **Next.js**, **TypeScript**, **Clerk**, and **Supabase**.
 - [Technology Stack](#technology-stack)
 - [Quick Start](#quick-start)
 - [Environment Variables](#environment-variables)
+- [Deploy to Vercel](#deploy-to-vercel)
 - [Application Routes](#application-routes)
 - [Architecture](#architecture)
 - [Data Model](#data-model)
@@ -103,6 +104,16 @@ The checked-in `.env.example` contains placeholder values only.
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Dashboard → Project Settings → API Keys |
 
 Do not expose or configure a Supabase service-role key for this app. Database access uses the signed-in user's Clerk token and is governed by RLS.
+
+## Deploy to Vercel
+
+The `taskboard` Vercel project is configured with the Next.js preset, repository root (`.`), and automatic build settings. Add the four variables above in **Project Settings → Environment Variables** for both **Preview** and **Production** before deploying. Do not add a Supabase service-role key.
+
+Use production Clerk keys for Production and configure the production Clerk instance with the Vercel production domain. The Supabase project's Clerk third-party auth integration must point to that same Clerk instance. For Preview deployments, use a Clerk instance whose allowed origins and Supabase integration are configured for the preview environment.
+
+From this project directory, `vercel` creates a Preview deployment and `vercel --prod` creates a Production deployment. Verify the Preview URL first, including sign-in, board creation, and public/private board access. Environment variable changes take effect on new deployments, so redeploy after changing them.
+
+See [Vercel's CLI deployment guide](https://vercel.com/docs/projects/deploy-from-cli) and [environment variable guide](https://vercel.com/docs/environment-variables) for the current workflow and settings.
 
 ## Application Routes
 
