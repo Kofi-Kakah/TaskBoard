@@ -11,7 +11,9 @@ export default function SignUpPage() {
           routing="path"
           path="/sign-up"
           signInUrl="/sign-in"
+          forceRedirectUrl="/boards"
           signInFallbackRedirectUrl="/boards"
+          signInForceRedirectUrl="/boards"
         />
       </section>
     </main>

@@ -62,6 +62,12 @@ end $$;
 
 ## Phase 11 public board verification
 
+### Execution note — 2026-10-23
+
+- Anonymous `GET /explore` returned HTTP 200 and rendered the empty state (`No public boards yet`). No public board fixture was available, so public-board visibility, read-only controls, and the signed-out board prompt could not be exercised.
+- No browser session was exposed to this workspace, so the User A/User B and interactive signed-out checks were not run.
+- Requests to dynamic board routes returned HTTP 200 at the initial response because the app uses Next.js partial prerendering; this smoke request does not establish the final streamed 404 outcome. Verify the private-board result in a browser as listed below.
+
 Use the public and private fixture boards above. The board IDs are visible on User A's `/supabase-check` page.
 
 1. While signed in as User B, open the public fixture at `/boards/<public-board-id>`. The board, columns, tasks, and labels should load. The header should show **View only**; board settings, task/column menus, add controls, and drag handles should be absent.

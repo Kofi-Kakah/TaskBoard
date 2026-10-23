@@ -22,6 +22,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ClerkProvider
           afterSignOutUrl="/"
+          signInFallbackRedirectUrl="/boards"
+          signInForceRedirectUrl="/boards"
+          signUpFallbackRedirectUrl="/boards"
+          signUpForceRedirectUrl="/boards"
           appearance={{
             theme: shadcn,
             variables: {

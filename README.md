@@ -56,7 +56,7 @@ Only the Supabase publishable key belongs in this app. Row Level Security protec
 
 ## Routes
 
-- `/` — welcome page
+- `/` — redirects signed-out visitors to `/sign-in` and signed-in visitors to `/boards`
 - `/boards` — signed-in user's boards
 - `/boards/[boardId]` — board view; public boards are read-only to non-owners, while private boards return 404 to non-owners
 - `/explore` — public boards

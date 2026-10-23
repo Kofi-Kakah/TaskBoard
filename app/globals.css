@@ -265,7 +265,8 @@ button { cursor: pointer; }
 .board-list-icon { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 7px; color: white; font-size: 10px; font-weight: 600; }
 .board-active-mark { width: 5px; height: 5px; margin-left: auto; border-radius: 50%; background: var(--primary); }
 .sidebar-bottom-note { display: flex; align-items: center; gap: 8px; margin-top: auto; padding: 12px 7px 6px; color: var(--text-subtle); font-size: 11px; }
-.sidebar-mobile-auth { display: none; }
+.sidebar-mobile-auth { display: flex; min-height: 52px; align-items: center; margin-top: 0; padding: 10px 7px 2px; border-top: 1px solid var(--border); }
+.sidebar-account-control { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px; font-weight: 500; }
 .sidebar-backdrop { display: none; }
 .app-main { display: flex; min-width: 0; min-height: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: 0 1px 2px rgb(16 24 40 / 3%); }
 .board-header { display: flex; min-height: 60px; flex: 0 0 60px; align-items: center; justify-content: space-between; gap: 12px; padding: 0 19px; border-bottom: 1px solid var(--border); }
@@ -520,6 +521,7 @@ button { cursor: pointer; }
 }
 
 @media (min-width: 1280px) {
+  .app-shell[data-sidebar-open="true"] .rail-user { display: none; }
   .desktop-sidebar-button { display: none; }
   .app-shell[data-sidebar-open="false"] .desktop-sidebar-button { display: grid; }
   .app-shell[data-sidebar-open="false"] .app-sidebar { display: none; }
@@ -574,7 +576,8 @@ button { cursor: pointer; }
   .task-label-pill, .task-label-overflow { font-size: 11px; }
   .mobile-navigation-sheet { width: min(320px, 88vw); padding: 15px; }
   .mobile-sheet-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; color: var(--text); font-size: 15px; font-weight: 600; }
-  .mobile-navigation-sheet .sidebar-mobile-auth { display: block; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .mobile-navigation-sheet .sidebar-bottom-note { margin-top: auto; }
+  .mobile-navigation-sheet .sidebar-mobile-auth { display: flex; margin-top: 0; padding-top: 14px; border-top: 1px solid var(--border); }
   .mobile-navigation-sheet .sidebar-auth { display: flex; gap: 14px; }
   .mobile-navigation-sheet .sidebar-auth .auth-link { color: var(--primary); font-size: 12px; }
   .mobile-navigation-sheet .sidebar-collapse { display: none; }

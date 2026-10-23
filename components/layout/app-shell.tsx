@@ -27,7 +27,9 @@ import type { BoardDisplaySummary, BoardSummary } from "@/lib/boards";
 function AuthControl({ inSidebar = false }: { inSidebar?: boolean }) {
   return (
     <Suspense fallback={<span className="user-button-fallback" aria-hidden="true" />}>
-      <Show when="signed-in"><UserButton /></Show>
+      <Show when="signed-in">
+        {inSidebar ? <div className="sidebar-account-control"><UserButton /><span>Account</span></div> : <UserButton />}
+      </Show>
       <Show when="signed-out">
         <div className={inSidebar ? "sidebar-auth" : "rail-auth"}>
           <SignInButton mode="redirect"><button type="button" className="auth-link">Sign in</button></SignInButton>
@@ -111,7 +113,7 @@ function SidebarContents({
       <div className="sidebar-section-heading">
         <span><ChevronDown size={14} /> Boards</span>
         <span className="sidebar-section-actions">
-          {canCreateBoard && <BoardDialog trigger={<button type="button" aria-label="Create board"><Plus size={16} /></button>} />}
+          {canCreateBoard && <Show when="signed-in"><BoardDialog trigger={<button type="button" aria-label="Create board"><Plus size={16} /></button>} /></Show>}
         </span>
       </div>
       <nav className="board-list" aria-label="Your boards">
@@ -158,7 +160,7 @@ function BoardRail({
         ))}
       </div>
       <div className="rail-divider" />
-      {canCreateBoard && <BoardDialog trigger={<button className="rail-create" type="button" aria-label="Create board"><Plus size={18} /></button>} />}
+      {canCreateBoard && <Show when="signed-in"><BoardDialog trigger={<button className="rail-create" type="button" aria-label="Create board"><Plus size={18} /></button>} /></Show>}
       <div className="rail-bottom-spacer" />
       <div className="rail-user"><AuthControl /></div>
     </aside>
@@ -171,7 +173,7 @@ export function AppShell({
   currentBoard,
   pageTitle = "Your boards",
   canManageBoard = false,
-  canCreateBoard = true,
+  canCreateBoard = false,
 }: {
   children: ReactNode;
   boards: BoardSummary[];

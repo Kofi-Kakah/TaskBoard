@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Show } from "@clerk/nextjs";
 import { ArrowUpRight, Columns3, LayoutGrid, Plus, SquareKanban, Trash2 } from "lucide-react";
 import { BoardDialog } from "@/components/board/board-dialog";
 import { DeleteBoardDialog } from "@/components/board/delete-board-dialog";
@@ -24,14 +25,16 @@ function BoardCard({ board }: { board: BoardSummary }) {
         <span><LayoutGrid size={14} /> {board.taskCount} {board.taskCount === 1 ? "task" : "tasks"}</span>
       </div>
       <div className="board-card-actions">
-        <BoardDialog
-          board={board}
-          trigger={<Button type="button" variant="outline" className="board-card-edit">Edit board</Button>}
-        />
-        <DeleteBoardDialog
-          board={board}
-          trigger={<button className="icon-button board-card-delete" type="button" aria-label={`Delete ${board.title}`}><Trash2 size={15} /></button>}
-        />
+        <Show when="signed-in">
+          <BoardDialog
+            board={board}
+            trigger={<Button type="button" variant="outline" className="board-card-edit">Edit board</Button>}
+          />
+          <DeleteBoardDialog
+            board={board}
+            trigger={<button className="icon-button board-card-delete" type="button" aria-label={`Delete ${board.title}`}><Trash2 size={15} /></button>}
+          />
+        </Show>
       </div>
     </article>
   );
@@ -55,7 +58,7 @@ export function BoardsDashboard({ result }: { result: BoardListResult }) {
           <h2 id="boards-heading">Your boards</h2>
           <p>Keep projects and tasks organized in one place.</p>
         </div>
-        <BoardDialog trigger={<Button type="button" variant="default"><Plus size={16} /> New board</Button>} />
+        <Show when="signed-in"><BoardDialog trigger={<Button type="button" variant="default"><Plus size={16} /> New board</Button>} /></Show>
       </div>
 
       {result.data.length ? (
@@ -67,7 +70,7 @@ export function BoardsDashboard({ result }: { result: BoardListResult }) {
           <span className="boards-empty-icon"><SquareKanban size={23} /></span>
           <h2>No boards yet</h2>
           <p>Create a board to start organizing your work.</p>
-          <BoardDialog trigger={<Button type="button" variant="default"><Plus size={16} /> Create your first board</Button>} />
+          <Show when="signed-in"><BoardDialog trigger={<Button type="button" variant="default"><Plus size={16} /> Create your first board</Button>} /></Show>
         </div>
       )}
     </section>

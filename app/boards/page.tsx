@@ -12,7 +12,7 @@ export default async function BoardsPage() {
   const boards = result.ok ? result.data : [];
 
   return (
-    <AppShell boards={boards} pageTitle="Your boards">
+    <AppShell boards={boards} pageTitle="Your boards" canCreateBoard={Boolean(userId)}>
       <BoardsDashboard result={result} />
     </AppShell>
   );
