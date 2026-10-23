@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Columns3, LayoutGrid, Plus, SquareKanban } from "lucide-react";
+import { moveColumn, moveTask } from "@/actions/ordering";
 import { createTask, deleteTask, updateTask, type TaskActionResult } from "@/actions/tasks";
 import { BoardColumns } from "@/components/board/board-columns";
 import { BoardDialog } from "@/components/board/board-dialog";
@@ -133,7 +134,15 @@ export function BoardOverview({ board, columns: initialColumns, labels: initialL
         <DeleteBoardDialog board={board} redirectAfterDelete trigger={<Button type="button" variant="outline" className="danger-outline">Delete board</Button>} />
       </div>
     </section>
-    {columns.length ? <BoardColumns boardId={board.id} columns={columns} onQuickAdd={quickAdd} onEditTask={(task) => { setEditingTask(task); setTaskOpen(true); }} onDeleteTask={setDeletingTask} /> : (
+    {columns.length ? <BoardColumns boardId={board.id} columns={columns} onColumnsChange={setColumns} onQuickAdd={quickAdd} onEditTask={(task) => { setEditingTask(task); setTaskOpen(true); }} onDeleteTask={setDeletingTask}
+      onMoveTask={async (taskId, columnId, previousId, nextId, snapshot) => {
+        const result = await moveTask({ boardId: board.id, taskId, columnId, previousId, nextId });
+        if (!result.ok) { setColumns(snapshot); toast.error(result.error); } else router.refresh();
+      }}
+      onMoveColumn={async (columnId, previousId, nextId, snapshot) => {
+        const result = await moveColumn({ boardId: board.id, columnId, previousId, nextId });
+        if (!result.ok) { setColumns(snapshot); toast.error(result.error); } else router.refresh();
+      }} /> : (
       <section className="board-detail-empty">
         <span className="boards-empty-icon"><SquareKanban size={23} /></span>
         <h2>Your board is ready</h2><p>Create your first column to start organizing tasks.</p>

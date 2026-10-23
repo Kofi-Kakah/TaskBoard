@@ -2,6 +2,7 @@
 
 import { CalendarDays, Circle, MoreHorizontal } from "lucide-react";
 import type { KeyboardEvent } from "react";
+import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDateOnly, getDueDateStatus } from "@/lib/dates";
 import type { TaskWithLabels } from "@/types/database";
@@ -11,17 +12,17 @@ function PriorityTile({ priority }: { priority: TaskWithLabels["priority"] }) {
   return <span className={`priority-tile priority-${priority}`} aria-label={labels[priority]} title={labels[priority]}><span className="priority-bars" aria-hidden="true"><i /><i /><i /></span></span>;
 }
 
-export function TaskCard({ task, onEdit, onDelete }: { task: TaskWithLabels; onEdit: (task: TaskWithLabels) => void; onDelete: (task: TaskWithLabels) => void }) {
+export function TaskCard({ task, onEdit, onDelete, dragAttributes, dragListeners, dragActivatorRef }: { task: TaskWithLabels; onEdit: (task: TaskWithLabels) => void; onDelete: (task: TaskWithLabels) => void; dragAttributes?: DraggableAttributes; dragListeners?: DraggableSyntheticListeners; dragActivatorRef?: (element: HTMLElement | null) => void }) {
   const dueStatus = task.due_date ? getDueDateStatus(task.due_date) : null;
   function handleOpenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Enter" || event.key === " ") {
+    if (event.key === "Enter") {
       event.preventDefault();
       onEdit(task);
     }
   }
   return (
     <article className="kanban-task-card">
-      <div className="task-card-open task-card-content" role="button" tabIndex={0} onClick={() => onEdit(task)} onKeyDown={handleOpenKeyDown} aria-label={`Edit task: ${task.title}`}>
+      <div ref={dragActivatorRef} className="task-card-open task-card-content" role="button" tabIndex={0} onClick={() => onEdit(task)} onKeyDown={handleOpenKeyDown} aria-label={`Edit task: ${task.title}`} {...dragAttributes} {...dragListeners}>
         <div className="task-card-heading">
           <span className="task-label-marker" style={{ backgroundColor: task.labels[0]?.color ?? "#EAECF0", color: task.labels[0]?.color ?? "#667085" }} aria-hidden="true"><Circle size={11} /></span>
           <span className="task-card-title" title={task.title}>{task.title}</span>
